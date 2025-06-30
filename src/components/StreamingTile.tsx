@@ -1,7 +1,9 @@
+
 import { useState } from 'react';
 import { ExternalLink, Trash2, Edit, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { StreamingUrl } from '@/pages/Index';
 import { FireTVWebView } from './FireTVWebView';
 import {
@@ -15,6 +17,7 @@ interface StreamingTileProps {
   url: StreamingUrl;
   onRemove: () => void;
   onUpdate: (updates: Partial<StreamingUrl>) => void;
+  onEdit: () => void;
   viewMode: 'grid' | 'list';
   isSelected: boolean;
   onSelect: () => void;
@@ -24,6 +27,7 @@ export const StreamingTile = ({
   url, 
   onRemove, 
   onUpdate, 
+  onEdit,
   viewMode, 
   isSelected, 
   onSelect 
@@ -43,10 +47,6 @@ export const StreamingTile = ({
 
   const handleImageError = () => {
     setImageError(true);
-  };
-
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString();
   };
 
   if (showWebView) {
@@ -93,6 +93,26 @@ export const StreamingTile = ({
                   {url.description && (
                     <p className="text-sm text-slate-400 line-clamp-1">{url.description}</p>
                   )}
+                  
+                  {url.tags && url.tags.length > 0 && (
+                    <div className="flex gap-1 mt-1 flex-wrap">
+                      {url.tags.slice(0, 3).map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs bg-blue-600/20 text-blue-300"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                      {url.tags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs bg-slate-600 text-slate-300">
+                          +{url.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
                   <p className="text-xs text-slate-500 mt-1">Added {new Date(url.addedAt).toLocaleDateString()}</p>
                 </div>
 
@@ -117,6 +137,10 @@ export const StreamingTile = ({
           <ContextMenuItem onClick={openStream} className="hover:bg-slate-700">
             <Play className="w-4 h-4 mr-2" />
             Open Stream
+          </ContextMenuItem>
+          <ContextMenuItem onClick={onEdit} className="hover:bg-slate-700">
+            <Edit className="w-4 h-4 mr-2" />
+            Edit Stream
           </ContextMenuItem>
           <ContextMenuItem onClick={onRemove} className="hover:bg-slate-700 text-red-400">
             <Trash2 className="w-4 h-4 mr-2" />
@@ -174,6 +198,26 @@ export const StreamingTile = ({
             {url.description && (
               <p className="text-sm text-slate-400 line-clamp-2 mb-2">{url.description}</p>
             )}
+            
+            {url.tags && url.tags.length > 0 && (
+              <div className="flex gap-1 mb-2 flex-wrap">
+                {url.tags.slice(0, 2).map((tag, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="text-xs bg-blue-600/20 text-blue-300"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+                {url.tags.length > 2 && (
+                  <Badge variant="secondary" className="text-xs bg-slate-600 text-slate-300">
+                    +{url.tags.length - 2}
+                  </Badge>
+                )}
+              </div>
+            )}
+            
             <p className="text-xs text-slate-500">Added {new Date(url.addedAt).toLocaleDateString()}</p>
           </CardContent>
         </Card>
@@ -183,6 +227,10 @@ export const StreamingTile = ({
         <ContextMenuItem onClick={openStream} className="hover:bg-slate-700">
           <Play className="w-4 h-4 mr-2" />
           Open Stream
+        </ContextMenuItem>
+        <ContextMenuItem onClick={onEdit} className="hover:bg-slate-700">
+          <Edit className="w-4 h-4 mr-2" />
+          Edit Stream
         </ContextMenuItem>
         <ContextMenuItem onClick={onRemove} className="hover:bg-slate-700 text-red-400">
           <Trash2 className="w-4 h-4 mr-2" />

@@ -1,10 +1,11 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { StreamingTile } from '@/components/StreamingTile';
 import { AddUrlDialog } from '@/components/AddUrlDialog';
 import { SettingsPanel } from '@/components/SettingsPanel';
+import { EditStreamDialog } from '@/components/EditStreamDialog';
+import { LinkScrapingDialog } from '@/components/LinkScrapingDialog';
 import { NavigationProvider } from '@/components/NavigationProvider';
-import { Plus, Settings, Grid, List, Tv } from 'lucide-react';
+import { Plus, Settings, Grid, List, Tv, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -16,12 +17,16 @@ export interface StreamingUrl {
   thumbnail?: string;
   addedAt: number;
   customThumbnail?: string;
+  tags?: string[];
 }
 
 const Index = () => {
   const [urls, setUrls] = useState<StreamingUrl[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showScrapingDialog, setShowScrapingDialog] = useState(false);
+  const [editingUrl, setEditingUrl] = useState<StreamingUrl | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { toast } = useToast();
@@ -52,7 +57,8 @@ const Index = () => {
         id: Date.now().toString(),
         url,
         title: url, // Fallback title
-        addedAt: Date.now()
+        addedAt: Date.now(),
+        tags: []
       };
 
       // Try to fetch metadata
@@ -61,6 +67,7 @@ const Index = () => {
         newUrl.title = metadata.title || url;
         newUrl.description = metadata.description;
         newUrl.thumbnail = metadata.thumbnail;
+        newUrl.tags = metadata.tags || [];
       } catch (metadataError) {
         console.warn('Could not fetch metadata for URL:', url, metadataError);
       }
@@ -80,6 +87,19 @@ const Index = () => {
     }
   }, [toast]);
 
+  const addMultipleUrls = useCallback(async (urlsToAdd: { url: string; title: string; description?: string }[]) => {
+    const newUrls: StreamingUrl[] = urlsToAdd.map(item => ({
+      id: Date.now().toString() + Math.random(),
+      url: item.url,
+      title: item.title,
+      description: item.description,
+      addedAt: Date.now(),
+      tags: []
+    }));
+
+    setUrls(prev => [...prev, ...newUrls]);
+  }, []);
+
   const removeUrl = useCallback((id: string) => {
     setUrls(prev => prev.filter(url => url.id !== id));
     toast({
@@ -94,6 +114,11 @@ const Index = () => {
     ));
   }, []);
 
+  const handleEditUrl = useCallback((streamingUrl: StreamingUrl) => {
+    setEditingUrl(streamingUrl);
+    setShowEditDialog(true);
+  }, []);
+
   // Simple metadata fetching simulation (in real app, this would be a backend service)
   const fetchUrlMetadata = async (url: string) => {
     // Simulate metadata fetching delay
@@ -102,15 +127,26 @@ const Index = () => {
     // Extract domain name as fallback title
     try {
       const domain = new URL(url).hostname;
+      const siteName = domain.replace('www.', '').split('.')[0].toUpperCase();
+      
+      // Auto-tag based on domain
+      const tags = [];
+      if (domain.includes('youtube')) tags.push('YouTube', 'Video');
+      if (domain.includes('aniworld')) tags.push('Anime', 'Series');
+      if (domain.includes('netflix')) tags.push('Netflix', 'Movies');
+      if (domain.includes('twitch')) tags.push('Twitch', 'Live');
+      
       return {
-        title: domain.replace('www.', '').split('.')[0].toUpperCase(),
+        title: siteName,
         description: `Stream content from ${domain}`,
-        thumbnail: `https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400&h=225&fit=crop` // Placeholder
+        thumbnail: `https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400&h=225&fit=crop`, // Placeholder
+        tags
       };
     } catch {
       return {
         title: 'Streaming Source',
-        description: 'Custom streaming link'
+        description: 'Custom streaming link',
+        tags: ['Custom']
       };
     }
   };
@@ -169,6 +205,16 @@ const Index = () => {
           
           <div className="flex items-center gap-4">
             <Button
+              onClick={() => setShowScrapingDialog(true)}
+              variant="outline"
+              size="sm"
+              className="bg-slate-800 border-slate-600 hover:bg-slate-700"
+            >
+              <Search className="w-4 h-4 mr-2" />
+              Scrape Links
+            </Button>
+            
+            <Button
               onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
               variant="outline"
               size="sm"
@@ -205,15 +251,25 @@ const Index = () => {
               </div>
               <h2 className="text-2xl font-semibold mb-2">No Streaming Sources Yet</h2>
               <p className="text-slate-400 mb-8 max-w-md mx-auto">
-                Add your favorite streaming websites to get started. The app will automatically fetch thumbnails and titles.
+                Add your favorite streaming websites or scrape links from series pages to get started.
               </p>
-              <Button 
-                onClick={() => setShowAddDialog(true)}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Your First URL
-              </Button>
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  onClick={() => setShowAddDialog(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Single URL
+                </Button>
+                <Button 
+                  onClick={() => setShowScrapingDialog(true)}
+                  variant="outline"
+                  className="bg-slate-800 border-slate-600 hover:bg-slate-700"
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  Scrape Links
+                </Button>
+              </div>
             </div>
           ) : (
             <div className={
@@ -227,6 +283,7 @@ const Index = () => {
                   url={streamingUrl}
                   onRemove={() => removeUrl(streamingUrl.id)}
                   onUpdate={(updates) => updateUrl(streamingUrl.id, updates)}
+                  onEdit={() => handleEditUrl(streamingUrl)}
                   viewMode={viewMode}
                   isSelected={selectedIndex === index}
                   onSelect={() => setSelectedIndex(index)}
@@ -241,6 +298,23 @@ const Index = () => {
           open={showAddDialog}
           onOpenChange={setShowAddDialog}
           onAddUrl={addUrl}
+        />
+
+        <EditStreamDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          streamingUrl={editingUrl}
+          onUpdate={(updates) => {
+            if (editingUrl) {
+              updateUrl(editingUrl.id, updates);
+            }
+          }}
+        />
+
+        <LinkScrapingDialog
+          open={showScrapingDialog}
+          onOpenChange={setShowScrapingDialog}
+          onAddUrls={addMultipleUrls}
         />
 
         <SettingsPanel
