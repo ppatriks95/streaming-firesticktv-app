@@ -4,7 +4,7 @@ import { StreamingTile } from '@/components/StreamingTile';
 import { AddUrlDialog } from '@/components/AddUrlDialog';
 import { SettingsPanel } from '@/components/SettingsPanel';
 import { NavigationProvider } from '@/components/NavigationProvider';
-import { Plus, Settings, Grid, List } from 'lucide-react';
+import { Plus, Settings, Grid, List, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -201,7 +201,7 @@ const Index = () => {
           {urls.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-slate-800 flex items-center justify-center">
-                <tv className="w-12 h-12 text-slate-400" />
+                <Tv className="w-12 h-12 text-slate-400" />
               </div>
               <h2 className="text-2xl font-semibold mb-2">No Streaming Sources Yet</h2>
               <p className="text-slate-400 mb-8 max-w-md mx-auto">
