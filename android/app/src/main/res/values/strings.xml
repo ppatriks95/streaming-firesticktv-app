@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">stream-tile-firestick-app</string>
+    <string name="title_activity_main">stream-tile-firestick-app</string>
+    <string name="package_name">app.lovable.b472c8e3debb4a109898d2c49c9c41a1</string>
+    <string name="custom_url_scheme">app.lovable.b472c8e3debb4a109898d2c49c9c41a1</string>
+</resources>

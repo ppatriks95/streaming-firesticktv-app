@@ -31,16 +31,29 @@ const Index = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { toast } = useToast();
 
-  // Load URLs from localStorage on component mount
+  // Load URLs from local NAT server on component mount
   useEffect(() => {
-    const savedUrls = localStorage.getItem('streaming-urls');
-    if (savedUrls) {
+    const fetchLocalStreams = async () => {
       try {
-        setUrls(JSON.parse(savedUrls));
+        // Passe die URL ggf. an deinen lokalen Server an
+        const response = await fetch('http://192.168.178.10:3000/streams.json');
+        if (!response.ok) throw new Error('Fehler beim Laden der Streams');
+        const data = await response.json();
+        setUrls(data);
       } catch (error) {
-        console.error('Error loading saved URLs:', error);
+        console.error('Fehler beim Laden der lokalen Streams:', error);
+        // Optional: Fallback auf localStorage
+        // const savedUrls = localStorage.getItem('streaming-urls');
+        // if (savedUrls) {
+        //   try {
+        //     setUrls(JSON.parse(savedUrls));
+        //   } catch (e) {
+        //     console.error('Error loading saved URLs:', e);
+        //   }
+        // }
       }
-    }
+    };
+    fetchLocalStreams();
   }, []);
 
   // Save URLs to localStorage whenever urls change
