@@ -213,9 +213,17 @@ const Index = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Fire TV Streaming Hub
             </h1>
-            <p className="text-slate-400 mt-1">Your personal streaming collection</p>
+            <p className="text-slate-400 mt-1">Your personal streaming collection. Developed by Patrik</p>
           </div>
-          
+
+          <div className="flex items-center gap-6">
+            <Button>
+              <Tv className="w-4 h-4 mr-2" />
+              Categories
+            </Button>
+          </div>
+
+
           <div className="flex items-center gap-4">
             <Button
               onClick={() => setShowScrapingDialog(true)}
