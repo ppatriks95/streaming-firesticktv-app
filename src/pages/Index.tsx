@@ -36,7 +36,7 @@ const Index = () => {
     const fetchLocalStreams = async () => {
       try {
         // Passe die URL ggf. an deinen lokalen Server an
-        const response = await fetch('http://192.168.178.10:3000/streams.json');
+        const response = await fetch('http://192.168.0.185:3000/links.json');
         if (!response.ok) throw new Error('Fehler beim Laden der Streams');
         const data = await response.json();
         setUrls(data);
