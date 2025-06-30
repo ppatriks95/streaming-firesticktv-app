@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { ExternalLink, Trash2, Edit, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { StreamingUrl } from '@/pages/Index';
+import { FireTVWebView } from './FireTVWebView';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -30,11 +30,15 @@ export const StreamingTile = ({
 }: StreamingTileProps) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showWebView, setShowWebView] = useState(false);
 
   const openStream = () => {
-    console.log('Opening stream:', url.url);
-    // In a real Fire TV app, this would open in a WebView
-    window.open(url.url, '_blank');
+    console.log('Opening stream in Fire TV WebView:', url.url);
+    setShowWebView(true);
+  };
+
+  const closeWebView = () => {
+    setShowWebView(false);
   };
 
   const handleImageError = () => {
@@ -44,6 +48,16 @@ export const StreamingTile = ({
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString();
   };
+
+  if (showWebView) {
+    return (
+      <FireTVWebView
+        url={url.url}
+        title={url.title}
+        onClose={closeWebView}
+      />
+    );
+  }
 
   if (viewMode === 'list') {
     return (
@@ -65,7 +79,7 @@ export const StreamingTile = ({
                       src={url.customThumbnail || url.thumbnail}
                       alt={url.title}
                       className="w-full h-full object-cover"
-                      onError={handleImageError}
+                      onError={() => setImageError(true)}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -79,7 +93,7 @@ export const StreamingTile = ({
                   {url.description && (
                     <p className="text-sm text-slate-400 line-clamp-1">{url.description}</p>
                   )}
-                  <p className="text-xs text-slate-500 mt-1">Added {formatDate(url.addedAt)}</p>
+                  <p className="text-xs text-slate-500 mt-1">Added {new Date(url.addedAt).toLocaleDateString()}</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -130,7 +144,7 @@ export const StreamingTile = ({
                 src={url.customThumbnail || url.thumbnail}
                 alt={url.title}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                onError={handleImageError}
+                onError={() => setImageError(true)}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -160,7 +174,7 @@ export const StreamingTile = ({
             {url.description && (
               <p className="text-sm text-slate-400 line-clamp-2 mb-2">{url.description}</p>
             )}
-            <p className="text-xs text-slate-500">Added {formatDate(url.addedAt)}</p>
+            <p className="text-xs text-slate-500">Added {new Date(url.addedAt).toLocaleDateString()}</p>
           </CardContent>
         </Card>
       </ContextMenuTrigger>
