@@ -1,20 +1,44 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stream-tile-firestick-app</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>Fire TV Streaming Hub</title>
+    <meta name="description" content="Custom Fire TV Stick streaming app for personal URL collection" />
+    <meta name="author" content="Fire TV Streaming Hub" />
 
-    <meta property="og:title" content="stream-tile-firestick-app" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:title" content="Fire TV Streaming Hub" />
+    <meta property="og:description" content="Custom Fire TV Stick streaming app for personal URL collection" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=1200&h=630&fit=crop" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=1200&h=630&fit=crop" />
+    
+    <!-- Optimize for TV display -->
+    <meta name="theme-color" content="#1e293b" />
+    <style>
+      /* TV-optimized cursor and selection styles */
+      * {
+        outline: none;
+      }
+      
+      body {
+        cursor: none; /* Hide cursor for TV interface */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      
+      /* Focus indicators for TV navigation */
+      .tv-focus {
+        box-shadow: 0 0 0 3px #3b82f6, 0 0 20px rgba(59, 130, 246, 0.3);
+        transform: scale(1.05);
+        transition: all 0.2s ease;
+      }
+    </style>
   </head>
 
   <body>
