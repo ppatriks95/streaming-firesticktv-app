@@ -1,61 +1,24 @@
-
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 
 interface NavigationContextType {
-  focusedElement: string | null;
-  setFocusedElement: (element: string | null) => void;
+  // Add navigation methods here if needed
 }
 
-const NavigationContext = createContext<NavigationContextType | null>(null);
+const NavigationContext = createContext<NavigationContextType>({});
 
-export const useNavigation = () => {
-  const context = useContext(NavigationContext);
-  if (!context) {
-    throw new Error('useNavigation must be used within NavigationProvider');
-  }
-  return context;
-};
+export const useNavigation = () => useContext(NavigationContext);
 
 interface NavigationProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const NavigationProvider = ({ children }: NavigationProviderProps) => {
-  const [focusedElement, setFocusedElement] = useState<string | null>(null);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Handle Fire TV remote simulation with keyboard
-      switch (event.key) {
-        case 'ArrowUp':
-        case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight':
-          event.preventDefault();
-          console.log('D-Pad navigation:', event.key);
-          break;
-        case 'Enter':
-        case ' ': // Space bar as OK button
-          event.preventDefault();
-          console.log('OK button pressed');
-          break;
-        case 'Escape':
-          event.preventDefault();
-          console.log('Back button pressed');
-          break;
-        case 'Home':
-          event.preventDefault();
-          console.log('Home button pressed');
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  const value = {
+    // Navigation implementation
+  };
 
   return (
-    <NavigationContext.Provider value={{ focusedElement, setFocusedElement }}>
+    <NavigationContext.Provider value={value}>
       {children}
     </NavigationContext.Provider>
   );

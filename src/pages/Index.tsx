@@ -29,52 +29,109 @@ const Index = () => {
   const [editingUrl, setEditingUrl] = useState<StreamingUrl | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { toast } = useToast();
 
-  // Load URLs from local NAT server on component mount
+  // Monitor online status
   useEffect(() => {
-    const fetchLocalStreams = async () => {
-      try {
-        // Passe die URL ggf. an deinen lokalen Server an
-        const response = await fetch('http://192.168.178.10:3000/streams.json');
-        if (!response.ok) throw new Error('Fehler beim Laden der Streams');
-        const data = await response.json();
-        setUrls(data);
-      } catch (error) {
-        console.error('Fehler beim Laden der lokalen Streams:', error);
-        // Optional: Fallback auf localStorage
-        // const savedUrls = localStorage.getItem('streaming-urls');
-        // if (savedUrls) {
-        //   try {
-        //     setUrls(JSON.parse(savedUrls));
-        //   } catch (e) {
-        //     console.error('Error loading saved URLs:', e);
-        //   }
-        // }
-      }
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
-    fetchLocalStreams();
   }, []);
 
-  // Save URLs to localStorage whenever urls change
+  // Load URLs with server/local fallback
   useEffect(() => {
-    localStorage.setItem('streaming-urls', JSON.stringify(urls));
-  }, [urls]);
+    const loadUrls = async () => {
+      try {
+        // Try to load from local storage first
+        const savedUrls = localStorage.getItem('streaming-urls');
+        if (savedUrls) {
+          const localUrls = JSON.parse(savedUrls);
+          setUrls(localUrls);
+          console.log('Loaded URLs from localStorage:', localUrls.length);
+        }
+
+        // If online, try to sync with server
+        if (isOnline) {
+          try {
+            const response = await fetch('http://localhost:3001/api/streams', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            if (response.ok) {
+              const serverUrls = await response.json();
+              setUrls(serverUrls);
+              localStorage.setItem('streaming-urls', JSON.stringify(serverUrls));
+              console.log('Synced URLs from server:', serverUrls.length);
+              
+              toast({
+                title: "Synced with Server",
+                description: `Loaded ${serverUrls.length} streams from server`,
+              });
+            }
+          } catch (serverError) {
+            console.log('Server not available, using local data');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading URLs:', error);
+      }
+    };
+
+    loadUrls();
+  }, [isOnline, toast]);
+
+  // Save URLs to both local and server
+  const saveUrls = useCallback(async (urlsToSave: StreamingUrl[]) => {
+    // Always save locally
+    localStorage.setItem('streaming-urls', JSON.stringify(urlsToSave));
+    
+    // Try to sync with server if online
+    if (isOnline) {
+      try {
+        await fetch('http://localhost:3001/api/streams', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(urlsToSave),
+        });
+        console.log('Synced URLs to server');
+      } catch (error) {
+        console.log('Could not sync to server, saved locally only');
+      }
+    }
+  }, [isOnline]);
+
+  // Save URLs whenever they change
+  useEffect(() => {
+    if (urls.length > 0) {
+      saveUrls(urls);
+    }
+  }, [urls, saveUrls]);
 
   const addUrl = useCallback(async (url: string) => {
     try {
       console.log('Adding URL:', url);
       
-      // Create new streaming URL object
       const newUrl: StreamingUrl = {
         id: Date.now().toString(),
         url,
-        title: url, // Fallback title
+        title: url,
         addedAt: Date.now(),
         tags: []
       };
 
-      // Try to fetch metadata
       try {
         const metadata = await fetchUrlMetadata(url);
         newUrl.title = metadata.title || url;
@@ -132,17 +189,13 @@ const Index = () => {
     setShowEditDialog(true);
   }, []);
 
-  // Simple metadata fetching simulation (in real app, this would be a backend service)
   const fetchUrlMetadata = async (url: string) => {
-    // Simulate metadata fetching delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Extract domain name as fallback title
     try {
       const domain = new URL(url).hostname;
       const siteName = domain.replace('www.', '').split('.')[0].toUpperCase();
       
-      // Auto-tag based on domain
       const tags = [];
       if (domain.includes('youtube')) tags.push('YouTube', 'Video');
       if (domain.includes('aniworld')) tags.push('Anime', 'Series');
@@ -152,7 +205,7 @@ const Index = () => {
       return {
         title: siteName,
         description: `Stream content from ${domain}`,
-        thumbnail: `https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400&h=225&fit=crop`, // Placeholder
+        thumbnail: `https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400&h=225&fit=crop`,
         tags
       };
     } catch {
@@ -213,7 +266,14 @@ const Index = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Fire TV Streaming Hub
             </h1>
-            <p className="text-slate-400 mt-1">Your personal streaming collection</p>
+            <p className="text-slate-400 mt-1">
+              Your personal streaming collection 
+              {isOnline ? (
+                <span className="text-green-400 ml-2">● Online</span>
+              ) : (
+                <span className="text-yellow-400 ml-2">● Offline</span>
+              )}
+            </p>
           </div>
           
           <div className="flex items-center gap-4">
