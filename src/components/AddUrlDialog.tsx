@@ -27,8 +27,8 @@ export const AddUrlDialog = ({ open, onOpenChange, onAddUrl }: AddUrlDialogProps
     
     if (!url.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a valid URL",
+        title: "Fehler",
+        description: "Bitte gib eine gültige URL ein",
         variant: "destructive",
       });
       return;
@@ -39,18 +39,32 @@ export const AddUrlDialog = ({ open, onOpenChange, onAddUrl }: AddUrlDialogProps
       await onAddUrl(url.trim());
       setUrl('');
       onOpenChange(false);
+      toast({
+        title: "Erfolgreich",
+        description: "URL wurde hinzugefügt",
+      });
     } catch (error) {
       console.error('Error adding URL:', error);
+      toast({
+        title: "Fehler",
+        description: "URL konnte nicht hinzugefügt werden",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCancel = () => {
+    setUrl('');
+    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-slate-800 border-slate-700 text-white">
         <DialogHeader>
-          <DialogTitle>Add Streaming URL</DialogTitle>
+          <DialogTitle>Streaming URL hinzufügen</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -58,12 +72,18 @@ export const AddUrlDialog = ({ open, onOpenChange, onAddUrl }: AddUrlDialogProps
             <Label htmlFor="url">URL</Label>
             <Input
               id="url"
-              type="url"
+              type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://example.com/stream"
-              className="bg-slate-700 border-slate-600 text-white"
+              placeholder="https://aniworld.to/anime/stream/..."
+              className="bg-slate-700 border-slate-600 text-white text-lg p-4"
               disabled={isLoading}
+              autoFocus
+              style={{
+                fontSize: '18px',
+                padding: '16px',
+                minHeight: '56px'
+              }}
             />
           </div>
           
@@ -71,17 +91,18 @@ export const AddUrlDialog = ({ open, onOpenChange, onAddUrl }: AddUrlDialogProps
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="bg-slate-700 border-slate-600 hover:bg-slate-600"
+              onClick={handleCancel}
+              className="bg-slate-700 border-slate-600 hover:bg-slate-600 text-lg p-4"
+              disabled={isLoading}
             >
-              Cancel
+              Abbrechen
             </Button>
             <Button
               type="submit"
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              disabled={isLoading || !url.trim()}
+              className="bg-blue-600 hover:bg-blue-700 text-lg p-4"
             >
-              {isLoading ? 'Adding...' : 'Add URL'}
+              {isLoading ? 'Wird hinzugefügt...' : 'URL hinzufügen'}
             </Button>
           </div>
         </form>

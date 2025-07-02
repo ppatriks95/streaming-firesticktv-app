@@ -36,27 +36,21 @@ export const LinkScrapingDialog = ({ open, onOpenChange, onAddUrls }: LinkScrapi
 
     setIsLoading(true);
     try {
-      // Simuliere Link-Scraping (in echter Implementierung würde hier eine API aufgerufen)
+      // Simuliere Link-Scraping für verschiedene Seiten-Typen
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Beispiel-Links basierend auf der URL
-      const mockLinks = [
-        {
-          url: `${pageUrl}/episode-1`,
-          title: "Episode 1",
-          description: "Erste Episode der Serie"
-        },
-        {
-          url: `${pageUrl}/episode-2`,
-          title: "Episode 2", 
-          description: "Zweite Episode der Serie"
-        },
-        {
-          url: `${pageUrl}/episode-3`,
-          title: "Episode 3",
-          description: "Dritte Episode der Serie"
-        }
-      ];
+      const baseUrl = pageUrl.includes('aniworld.to') ? pageUrl.split('/episode-')[0] : pageUrl;
+      const siteName = pageUrl.includes('aniworld.to') ? 'AniWorld' : 'Unbekannte Seite';
+      
+      // Generiere Episode-Links basierend auf der URL
+      const mockLinks = [];
+      for (let i = 1; i <= 12; i++) {
+        mockLinks.push({
+          url: `${baseUrl}/episode-${i}`,
+          title: `Episode ${i}`,
+          description: `${siteName} - Episode ${i}`
+        });
+      }
       
       setScrapedLinks(mockLinks);
       toast({
@@ -88,6 +82,12 @@ export const LinkScrapingDialog = ({ open, onOpenChange, onAddUrls }: LinkScrapi
     }
   };
 
+  const handleCancel = () => {
+    setPageUrl('');
+    setScrapedLinks([]);
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-2xl">
@@ -101,17 +101,23 @@ export const LinkScrapingDialog = ({ open, onOpenChange, onAddUrls }: LinkScrapi
             <div className="flex gap-2">
               <Input
                 id="pageUrl"
-                type="url"
+                type="text"
                 value={pageUrl}
                 onChange={(e) => setPageUrl(e.target.value)}
                 placeholder="https://aniworld.to/anime/stream/..."
-                className="bg-slate-700 border-slate-600 text-white"
+                className="bg-slate-700 border-slate-600 text-white text-lg p-4"
                 disabled={isLoading}
+                autoFocus
+                style={{
+                  fontSize: '18px',
+                  padding: '16px',
+                  minHeight: '56px'
+                }}
               />
               <Button
                 onClick={handleScrapeLinks}
-                disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700"
+                disabled={isLoading || !pageUrl.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-lg px-6"
               >
                 <Search className="w-4 h-4 mr-2" />
                 {isLoading ? 'Suche...' : 'Suchen'}
@@ -139,15 +145,15 @@ export const LinkScrapingDialog = ({ open, onOpenChange, onAddUrls }: LinkScrapi
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="bg-slate-700 border-slate-600 hover:bg-slate-600"
+              onClick={handleCancel}
+              className="bg-slate-700 border-slate-600 hover:bg-slate-600 text-lg p-4"
             >
               Abbrechen
             </Button>
             {scrapedLinks.length > 0 && (
               <Button
                 onClick={handleAddAllLinks}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 text-lg p-4"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Alle hinzufügen
