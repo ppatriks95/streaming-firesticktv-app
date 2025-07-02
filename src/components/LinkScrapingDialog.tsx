@@ -18,21 +18,17 @@ interface LinkScrapingDialogProps {
   onAddUrls: (urls: { url: string; title: string; description?: string }[]) => void;
 }
 
-export const LinkScrapingDialog = ({ 
-  open, 
-  onOpenChange, 
-  onAddUrls 
-}: LinkScrapingDialogProps) => {
+export const LinkScrapingDialog = ({ open, onOpenChange, onAddUrls }: LinkScrapingDialogProps) => {
   const [pageUrl, setPageUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [foundLinks, setFoundLinks] = useState<{ url: string; title: string }[]>([]);
+  const [scrapedLinks, setScrapedLinks] = useState<{ url: string; title: string; description?: string }[]>([]);
   const { toast } = useToast();
 
-  const handleScrape = async () => {
+  const handleScrapeLinks = async () => {
     if (!pageUrl.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a valid URL to scrape",
+        title: "Fehler",
+        description: "Bitte gib eine gültige URL ein",
         variant: "destructive",
       });
       return;
@@ -40,27 +36,38 @@ export const LinkScrapingDialog = ({
 
     setIsLoading(true);
     try {
-      // Simulate scraping (in real app, this would be a backend service)
+      // Simuliere Link-Scraping (in echter Implementierung würde hier eine API aufgerufen)
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Mock scraped links for demo
+      // Beispiel-Links basierend auf der URL
       const mockLinks = [
-        { url: `${pageUrl}/episode-1`, title: 'Episode 1' },
-        { url: `${pageUrl}/episode-2`, title: 'Episode 2' },
-        { url: `${pageUrl}/episode-3`, title: 'Episode 3' },
-        { url: `${pageUrl}/episode-4`, title: 'Episode 4' },
+        {
+          url: `${pageUrl}/episode-1`,
+          title: "Episode 1",
+          description: "Erste Episode der Serie"
+        },
+        {
+          url: `${pageUrl}/episode-2`,
+          title: "Episode 2", 
+          description: "Zweite Episode der Serie"
+        },
+        {
+          url: `${pageUrl}/episode-3`,
+          title: "Episode 3",
+          description: "Dritte Episode der Serie"
+        }
       ];
       
-      setFoundLinks(mockLinks);
-      
+      setScrapedLinks(mockLinks);
       toast({
-        title: "Scraping Complete",
-        description: `Found ${mockLinks.length} links`,
+        title: "Links gefunden",
+        description: `${mockLinks.length} Links wurden gefunden`,
       });
     } catch (error) {
+      console.error('Error scraping links:', error);
       toast({
-        title: "Scraping Failed",
-        description: "Could not scrape links from this page",
+        title: "Fehler",
+        description: "Links konnten nicht geladen werden",
         variant: "destructive",
       });
     } finally {
@@ -68,30 +75,29 @@ export const LinkScrapingDialog = ({
     }
   };
 
-  const handleAddSelected = () => {
-    if (foundLinks.length === 0) return;
-    
-    onAddUrls(foundLinks);
-    setFoundLinks([]);
-    setPageUrl('');
-    onOpenChange(false);
-    
-    toast({
-      title: "Links Added",
-      description: `Added ${foundLinks.length} streaming links`,
-    });
+  const handleAddAllLinks = () => {
+    if (scrapedLinks.length > 0) {
+      onAddUrls(scrapedLinks);
+      toast({
+        title: "Links hinzugefügt",
+        description: `${scrapedLinks.length} Links wurden zu deiner Sammlung hinzugefügt`,
+      });
+      onOpenChange(false);
+      setScrapedLinks([]);
+      setPageUrl('');
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-lg">
+      <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Scrape Links from Page</DialogTitle>
+          <DialogTitle>Links von Seite extrahieren</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           <div>
-            <Label htmlFor="pageUrl">Page URL</Label>
+            <Label htmlFor="pageUrl">Seiten-URL</Label>
             <div className="flex gap-2">
               <Input
                 id="pageUrl"
@@ -103,51 +109,48 @@ export const LinkScrapingDialog = ({
                 disabled={isLoading}
               />
               <Button
-                onClick={handleScrape}
+                onClick={handleScrapeLinks}
                 disabled={isLoading}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                <Search className="w-4 h-4" />
+                <Search className="w-4 h-4 mr-2" />
+                {isLoading ? 'Suche...' : 'Suchen'}
               </Button>
             </div>
           </div>
 
-          {isLoading && (
-            <div className="text-center py-4">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-              <p className="text-slate-400">Scraping links...</p>
-            </div>
-          )}
-
-          {foundLinks.length > 0 && (
+          {scrapedLinks.length > 0 && (
             <div>
-              <h3 className="font-semibold mb-2">Found Links ({foundLinks.length})</h3>
-              <div className="max-h-60 overflow-y-auto space-y-2">
-                {foundLinks.map((link, index) => (
-                  <div key={index} className="bg-slate-700/50 p-2 rounded text-sm">
-                    <div className="font-medium">{link.title}</div>
-                    <div className="text-slate-400 truncate">{link.url}</div>
+              <h3 className="font-medium mb-2">Gefundene Links ({scrapedLinks.length})</h3>
+              <div className="max-h-64 overflow-y-auto space-y-2 bg-slate-900 p-3 rounded">
+                {scrapedLinks.map((link, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-slate-800 rounded">
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{link.title}</div>
+                      <div className="text-xs text-slate-400 truncate">{link.url}</div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
-          
+
           <div className="flex justify-end gap-2">
             <Button
+              type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               className="bg-slate-700 border-slate-600 hover:bg-slate-600"
             >
-              Cancel
+              Abbrechen
             </Button>
-            {foundLinks.length > 0 && (
+            {scrapedLinks.length > 0 && (
               <Button
-                onClick={handleAddSelected}
+                onClick={handleAddAllLinks}
                 className="bg-green-600 hover:bg-green-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add All Links
+                Alle hinzufügen
               </Button>
             )}
           </div>
