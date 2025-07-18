@@ -3,8 +3,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Play, Calendar, Star, Tag } from 'lucide-react';
+import { ArrowLeft, Play, Calendar, Star, Tag, Grid, List } from 'lucide-react';
 import { StreamingUrl } from '@/pages/Index';
+import { EpisodeTile } from './EpisodeTile';
 
 interface Episode {
   id: string;
@@ -32,6 +33,7 @@ interface SeriesDetailProps {
 
 export const SeriesDetailView = ({ series, onBack, onPlayEpisode }: SeriesDetailProps) => {
   const [selectedSeason, setSelectedSeason] = useState(1);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   const episodes = series.episodes || [];
   const seasons = Array.from(new Set(episodes.map(ep => ep.season))).sort();
@@ -134,53 +136,70 @@ export const SeriesDetailView = ({ series, onBack, onPlayEpisode }: SeriesDetail
           </div>
         )}
 
-        {/* Episodes List */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">
-            Episoden - Staffel {selectedSeason}
+        {/* Episodes Section Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-semibold">
+            Episoden - Staffel {selectedSeason} ({seasonEpisodes.length})
           </h3>
           
-          {seasonEpisodes.length > 0 ? (
-            <div className="grid gap-4">
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setViewMode('grid')}
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              className={viewMode === 'grid' 
+                ? 'bg-blue-600 hover:bg-blue-700' 
+                : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
+              }
+            >
+              <Grid className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={() => setViewMode('list')}
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              className={viewMode === 'list' 
+                ? 'bg-blue-600 hover:bg-blue-700' 
+                : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
+              }
+            >
+              <List className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Episodes Grid/List */}
+        {seasonEpisodes.length > 0 ? (
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {seasonEpisodes.map((episode) => (
-                <Card key={episode.id} className="bg-slate-800 border-slate-700 hover:bg-slate-750 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="text-2xl font-bold text-slate-400 min-w-[3rem]">
-                        {episode.episode.toString().padStart(2, '0')}
-                      </div>
-                      
-                      <div className="flex-1">
-                        <h4 className="font-medium mb-1">{episode.title}</h4>
-                        {episode.description && (
-                          <p className="text-sm text-slate-400 line-clamp-2">{episode.description}</p>
-                        )}
-                        
-                        <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-                          {episode.duration && <span>⏱️ {episode.duration}</span>}
-                          {episode.airDate && <span>📅 {episode.airDate}</span>}
-                          {episode.rating && <span>⭐ {episode.rating}/10</span>}
-                        </div>
-                      </div>
-                      
-                      <Button
-                        onClick={() => onPlayEpisode(episode)}
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Play className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <EpisodeTile
+                  key={episode.id}
+                  episode={episode}
+                  onPlay={onPlayEpisode}
+                  viewMode="grid"
+                />
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-slate-400">
-              <p>Keine Episoden für Staffel {selectedSeason} gefunden.</p>
+            <div className="space-y-3">
+              {seasonEpisodes.map((episode) => (
+                <EpisodeTile
+                  key={episode.id}
+                  episode={episode}
+                  onPlay={onPlayEpisode}
+                  viewMode="list"
+                />
+              ))}
             </div>
-          )}
-        </div>
+          )
+        ) : (
+          <div className="text-center py-12 text-slate-400">
+            <div className="text-6xl mb-4">📺</div>
+            <h4 className="text-lg font-medium mb-2">Keine Episoden gefunden</h4>
+            <p>Für Staffel {selectedSeason} sind keine Episoden verfügbar.</p>
+          </div>
+        )}
       </div>
     </div>
   );
