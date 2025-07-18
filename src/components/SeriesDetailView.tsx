@@ -40,93 +40,89 @@ export const SeriesDetailView = ({ series, onBack, onPlayEpisode }: SeriesDetail
   const seasonEpisodes = episodes.filter(ep => ep.season === selectedSeason);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      <div className="p-6">
+    <div className="ml-64 min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+      {/* Hero Section - Netflix Style */}
+      <div className="relative h-96 overflow-hidden">
+        <img
+          src={series.customThumbnail || series.thumbnail || 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=1920&h=600&fit=crop'}
+          alt={series.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+        
+        {/* Back Button */}
         <Button 
           onClick={onBack}
           variant="ghost" 
-          className="mb-6 text-slate-300 hover:text-white"
+          className="absolute top-6 left-6 text-white hover:bg-white/20 backdrop-blur-sm"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Zurück zur Übersicht
+          Zurück
         </Button>
-
-        {/* Series Header */}
-        <div className="mb-8">
-          <div className="flex gap-6 mb-4">
-            <img
-              src={series.customThumbnail || series.thumbnail || 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&h=450&fit=crop'}
-              alt={series.title}
-              className="w-48 h-72 object-cover rounded-lg"
-            />
+        
+        {/* Series Info Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-8">
+          <h1 className="text-5xl font-bold mb-4">{series.title}</h1>
+          
+          <div className="flex items-center gap-6 mb-4">
+            {series.year && (
+              <span className="text-lg text-gray-300">{series.year}</span>
+            )}
             
-            <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-2">{series.title}</h1>
-              
-              <div className="flex items-center gap-4 mb-4">
-                {series.year && (
-                  <div className="flex items-center text-slate-300">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {series.year}
-                  </div>
-                )}
-                
-                {series.rating && (
-                  <div className="flex items-center text-yellow-400">
-                    <Star className="w-4 h-4 mr-1" />
-                    {series.rating}/10
-                  </div>
-                )}
-                
-                {series.seasons && (
-                  <Badge variant="outline" className="bg-slate-700 border-slate-600">
-                    {series.seasons} Staffel{series.seasons > 1 ? 'n' : ''}
-                  </Badge>
-                )}
+            {series.rating && (
+              <div className="flex items-center text-yellow-400">
+                <Star className="w-5 h-5 mr-1" />
+                <span className="text-lg font-semibold">{series.rating}/10</span>
               </div>
-
-              <p className="text-slate-300 mb-4 leading-relaxed">
-                {series.description || 'Keine Beschreibung verfügbar.'}
-              </p>
-
-              {/* Genres */}
-              {(series.genres || series.tags) && (
-                <div className="flex items-center gap-2 mb-4">
-                  <Tag className="w-4 h-4 text-slate-400" />
-                  <div className="flex flex-wrap gap-2">
-                    {(series.genres || series.tags || []).map((genre, index) => (
-                      <Badge key={index} variant="secondary" className="bg-slate-700 text-slate-300">
-                        {genre}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <Button 
-                onClick={() => window.open(series.url, '_blank')}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Play className="w-4 h-4 mr-2" />
-                Serie öffnen
-              </Button>
-            </div>
+            )}
+            
+            {series.seasons && (
+              <Badge variant="outline" className="bg-red-600 border-red-600 text-white px-3 py-1">
+                {series.seasons} Staffel{series.seasons > 1 ? 'n' : ''}
+              </Badge>
+            )}
           </div>
+
+          <p className="text-gray-300 text-lg max-w-3xl mb-6 leading-relaxed">
+            {series.description || 'Keine Beschreibung verfügbar.'}
+          </p>
+
+          {/* Genres */}
+          {(series.genres || series.tags) && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {(series.genres || series.tags || []).map((genre, index) => (
+                <Badge key={index} variant="secondary" className="bg-gray-800/80 text-gray-300 px-3 py-1">
+                  {genre}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          <Button 
+            onClick={() => window.open(series.url, '_blank')}
+            className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 text-lg"
+          >
+            <Play className="w-5 h-5 mr-2" />
+            Serie öffnen
+          </Button>
         </div>
+      </div>
+
+      <div className="p-8">
 
         {/* Season Selection */}
         {seasons.length > 1 && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Staffel auswählen</h3>
-            <div className="flex gap-2">
+          <div className="mb-8">
+            <h3 className="text-2xl font-semibold mb-4 text-white">Staffeln</h3>
+            <div className="flex gap-3">
               {seasons.map((season) => (
                 <Button
                   key={season}
                   onClick={() => setSelectedSeason(season)}
                   variant={selectedSeason === season ? "default" : "outline"}
                   className={selectedSeason === season 
-                    ? "bg-blue-600 hover:bg-blue-700" 
-                    : "bg-slate-700 border-slate-600 hover:bg-slate-600"
+                    ? "bg-red-600 hover:bg-red-700 text-white px-6 py-2" 
+                    : "bg-gray-800/50 border-gray-600 hover:bg-gray-700 text-gray-300 px-6 py-2"
                   }
                 >
                   Staffel {season}
@@ -137,9 +133,9 @@ export const SeriesDetailView = ({ series, onBack, onPlayEpisode }: SeriesDetail
         )}
 
         {/* Episodes Section Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">
-            Episoden - Staffel {selectedSeason} ({seasonEpisodes.length})
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="text-2xl font-semibold text-white">
+            Staffel {selectedSeason} <span className="text-lg text-gray-400">({seasonEpisodes.length} Episoden)</span>
           </h3>
           
           <div className="flex gap-2">
@@ -148,8 +144,8 @@ export const SeriesDetailView = ({ series, onBack, onPlayEpisode }: SeriesDetail
               variant={viewMode === 'grid' ? 'default' : 'outline'}
               size="sm"
               className={viewMode === 'grid' 
-                ? 'bg-blue-600 hover:bg-blue-700' 
-                : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
+                ? 'bg-red-600 hover:bg-red-700 text-white' 
+                : 'bg-gray-800/50 border-gray-600 hover:bg-gray-700 text-gray-300'
               }
             >
               <Grid className="w-4 h-4" />
@@ -159,8 +155,8 @@ export const SeriesDetailView = ({ series, onBack, onPlayEpisode }: SeriesDetail
               variant={viewMode === 'list' ? 'default' : 'outline'}
               size="sm"
               className={viewMode === 'list' 
-                ? 'bg-blue-600 hover:bg-blue-700' 
-                : 'bg-slate-700 border-slate-600 hover:bg-slate-600'
+                ? 'bg-red-600 hover:bg-red-700 text-white' 
+                : 'bg-gray-800/50 border-gray-600 hover:bg-gray-700 text-gray-300'
               }
             >
               <List className="w-4 h-4" />

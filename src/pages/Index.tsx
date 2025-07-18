@@ -379,85 +379,83 @@ const Index = () => {
 
   return (
     <NavigationProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        {/* Header */}
-        <header className="flex items-center justify-between p-6 border-b border-slate-700/50">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Fire TV Streaming Hub
-            </h1>
-            <p className="text-slate-400 mt-1">
-              Ihre persönliche Streaming-Sammlung 
-              {isOnline ? (
-                <span className="text-green-400 ml-2">● Online</span>
-              ) : (
-                <span className="text-yellow-400 ml-2">● Offline</span>
-              )}
-            </p>
+      <div className="min-h-screen bg-black text-white">
+        {/* Netflix-like sidebar */}
+        <aside className="fixed left-0 top-0 h-full w-64 bg-black/90 backdrop-blur-sm border-r border-gray-800 z-40">
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-red-600 mb-8">StreamHub</h1>
+            
+            <nav className="space-y-4">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-white hover:bg-gray-800"
+                onClick={() => setShowAddDialog(true)}
+              >
+                <Plus className="w-5 h-5 mr-3" />
+                URL hinzufügen
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-white hover:bg-gray-800"
+                onClick={() => setShowScrapingDialog(true)}
+              >
+                <Search className="w-5 h-5 mr-3" />
+                Links scrapen
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-white hover:bg-gray-800"
+                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              >
+                {viewMode === 'grid' ? <List className="w-5 h-5 mr-3" /> : <Grid className="w-5 h-5 mr-3" />}
+                {viewMode === 'grid' ? 'Listen-Ansicht' : 'Grid-Ansicht'}
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-white hover:bg-gray-800"
+                onClick={() => setShowServerSettings(true)}
+              >
+                <Server className="w-5 h-5 mr-3" />
+                Server
+              </Button>
+              
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-white hover:bg-gray-800"
+                onClick={() => setShowSettings(true)}
+              >
+                <Settings className="w-5 h-5 mr-3" />
+                Einstellungen
+              </Button>
+            </nav>
+            
+            <div className="mt-8 pt-6 border-t border-gray-800">
+              <div className="flex items-center gap-2 text-sm">
+                {isOnline ? (
+                  <span className="text-green-400">● Online</span>
+                ) : (
+                  <span className="text-yellow-400">● Offline</span>
+                )}
+              </div>
+              <Button
+                onClick={refreshFromServer}
+                disabled={isRefreshing || !isOnline}
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start mt-2 text-white hover:bg-gray-800"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Aktualisiere...' : 'Aktualisieren'}
+              </Button>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={refreshFromServer}
-              disabled={isRefreshing || !isOnline}
-              variant="outline"
-              size="sm"
-              className="bg-slate-800 border-slate-600 hover:bg-slate-700"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Aktualisiere...' : 'Aktualisieren'}
-            </Button>
-            
-            <Button
-              onClick={() => setShowServerSettings(true)}
-              variant="outline"
-              size="sm"
-              className="bg-slate-800 border-slate-600 hover:bg-slate-700"
-            >
-              <Server className="w-4 h-4 mr-2" />
-              Server
-            </Button>
-            
-            <Button
-              onClick={() => setShowScrapingDialog(true)}
-              variant="outline"
-              size="sm"
-              className="bg-slate-800 border-slate-600 hover:bg-slate-700"
-            >
-              <Search className="w-4 h-4 mr-2" />
-              Links scrapen
-            </Button>
-            
-            <Button
-              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-              variant="outline"
-              size="sm"
-              className="bg-slate-800 border-slate-600 hover:bg-slate-700"
-            >
-              {viewMode === 'grid' ? <List className="w-4 h-4" /> : <Grid className="w-4 h-4" />}
-            </Button>
-            
-            <Button
-              onClick={() => setShowSettings(true)}
-              variant="outline"
-              size="sm"
-              className="bg-slate-800 border-slate-600 hover:bg-slate-700"
-            >
-              <Settings className="w-4 h-4" />
-            </Button>
-            
-            <Button
-              onClick={() => setShowAddDialog(true)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              URL hinzufügen
-            </Button>
-          </div>
-        </header>
+        </aside>
 
-        {/* Main Content */}
-        <main className="p-6">
+        {/* Main Content Area */}
+        <main className="ml-64 min-h-screen bg-gradient-to-b from-gray-900 to-black">
           {/* Category Filter */}
           {allCategories.length > 0 && (
             <CategoryFilter

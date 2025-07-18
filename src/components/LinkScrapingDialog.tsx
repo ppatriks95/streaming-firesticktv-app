@@ -185,14 +185,30 @@ export const LinkScrapingDialog = ({ open, onOpenChange, onAddUrls }: LinkScrapi
             <h3 className="font-medium mb-3 text-slate-200">
               Gefundene {activeTab === 'episodes' ? 'Episoden' : 'Streams'} ({scrapedLinks.length})
             </h3>
-            <div className="max-h-48 overflow-y-auto space-y-2 bg-slate-900 p-3 rounded-lg border border-slate-700">
+            <div className="max-h-64 overflow-y-auto space-y-2 bg-slate-900 p-3 rounded-lg border border-slate-700">
               {scrapedLinks.map((link, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg hover:bg-slate-750 transition-colors">
+                <div key={index} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg hover:bg-slate-750 transition-colors group">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm text-white truncate">{link.title}</div>
                     <div className="text-xs text-slate-400 truncate">{link.description || link.url}</div>
                   </div>
-                  <div className="ml-2 flex-shrink-0">
+                  <div className="ml-2 flex-shrink-0 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-700 border-slate-600 hover:bg-slate-600 text-xs px-2 py-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddUrls([link]);
+                        toast({
+                          title: "Link hinzugefügt",
+                          description: `"${link.title}" wurde hinzugefügt`,
+                        });
+                      }}
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Hinzufügen
+                    </Button>
                     {activeTab === 'episodes' ? (
                       <Link className="w-4 h-4 text-blue-400" />
                     ) : (

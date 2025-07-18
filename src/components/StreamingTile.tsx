@@ -55,8 +55,8 @@ export const StreamingTile = ({
   if (viewMode === 'list') {
     return (
       <Card 
-        className={`bg-slate-800 border-slate-700 hover:bg-slate-750 transition-colors cursor-pointer ${
-          isSelected ? 'ring-2 ring-blue-500' : ''
+        className={`bg-gray-900/50 border-gray-800 hover:bg-gray-800/50 transition-colors cursor-pointer backdrop-blur-sm ${
+          isSelected ? 'ring-2 ring-red-500' : ''
         }`}
         onClick={onSelect}
       >
@@ -147,8 +147,8 @@ export const StreamingTile = ({
 
   return (
     <Card 
-      className={`bg-slate-800 border-slate-700 overflow-hidden transition-all duration-300 cursor-pointer group ${
-        isSelected ? 'ring-2 ring-blue-500 scale-[1.02]' : 'hover:scale-105'
+      className={`bg-gray-900/70 border-gray-800 overflow-hidden transition-all duration-300 cursor-pointer group backdrop-blur-sm ${
+        isSelected ? 'ring-2 ring-red-500 scale-[1.02]' : 'hover:scale-105'
       }`}
       onClick={onSelect}
     >
@@ -157,7 +157,7 @@ export const StreamingTile = ({
           <img
             src={imageError ? 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400&h=225&fit=crop' : thumbnailUrl}
             alt={url.title}
-            className="w-full h-36 object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110"
             onError={() => setImageError(true)}
           />
           
@@ -211,7 +211,7 @@ export const StreamingTile = ({
           </div>
         </div>
         
-        <div className="p-4 bg-slate-800">          
+        <div className="p-4 bg-gray-900/80 backdrop-blur-sm">          
           {(url.tags || url.genres) && (
             <div className="flex flex-wrap gap-1 mb-3">
               {[...(url.genres || []), ...(url.tags || [])].slice(0, 3).map((tag, index) => (
